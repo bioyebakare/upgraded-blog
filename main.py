@@ -1,11 +1,16 @@
 from flask import Flask, render_template, request
 import requests
 import smtplib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BLOG_URL = "https://api.npoint.io/159df8cf34fc36e1ad92"
 response = requests.get(BLOG_URL)
 blog_posts = response.json()
 print(blog_posts[0])
+
 
 app = Flask(__name__)
 
@@ -26,7 +31,11 @@ def do_the_login():
     print(email)
     print(no)
     print(msg)
-    x = f"Hi {name}, you have successfully sent a message"
+    x = f"Name: {name}\nEmail: {email}\nPhone: {no}\nMessage: {msg}"
+    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+        connection.starttls()
+        connection.login(user=os.getenv("MY_EMAIL"), password=os.getenv("MY_PASSWORD"))
+        connection.sendmail(from_addr=os.getenv("MY_EMAIL"), to_addrs="bioyebak@gmail.com", msg=f"Subject: You have 1 message from your Blog📩\n\n{x}".encode("utf-8"))
     return render_template('contact.html', msg_sent=True)
 
 def show_the_log_in_form():
